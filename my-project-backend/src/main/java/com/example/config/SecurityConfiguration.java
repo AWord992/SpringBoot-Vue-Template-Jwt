@@ -1,6 +1,9 @@
 package com.example.config;
 
 import com.example.entity.RestBean;
+import com.example.entity.vo.response.AuthorizeVO;
+import com.example.utils.JwtUtils;
+import jakarta.annotation.Resource;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,12 +14,16 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.io.IOException;
 
 @Configuration
 public class SecurityConfiguration {
+
+    @Resource
+    JwtUtils utils;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -45,7 +52,14 @@ public class SecurityConfiguration {
                                         Authentication authentication) throws IOException, ServletException {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
-        response.getWriter().write(RestBean.success().asJsonString());
+        User user = (User) authentication.getPrincipal();
+        String token = utils.createJwt(user, 1, "xiaoming");
+        AuthorizeVO vo = new AuthorizeVO();
+        vo.setExpire(utils.expireTime());
+        vo.setRole("");
+        vo.setToken(token);
+        vo.setUsername("xiaomin");
+        response.getWriter().write(RestBean.success(vo).asJsonString());
     }
 
     public void onAuthenticationFailure(HttpServletRequest request,
@@ -53,7 +67,9 @@ public class SecurityConfiguration {
                                         AuthenticationException exception) throws IOException, ServletException {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
-        response.getWriter().write(RestBean.failure(401, exception.getMessage()).asJsonString());
+        String errorMessage = "认证失败: " + exception.getClass().getSimpleName() + " - " + exception.getMessage();
+        response.getWriter().write(RestBean.failure(401, errorMessage).asJsonString());
+//        response.getWriter().write(RestBean.failure(401, exception.getMessage()).asJsonString());
     }
 
     public void onLogoutSuccess(HttpServletRequest request,
