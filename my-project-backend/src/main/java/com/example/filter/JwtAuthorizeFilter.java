@@ -33,10 +33,10 @@ public class JwtAuthorizeFilter extends OncePerRequestFilter {
         // 2. 如果token不合法，返回401
         if (jwt != null) {
             UserDetails user = utils.toUser(jwt);
-            System.out.println("权限列表: " + user.getAuthorities()); // 确认权限不为空且正确
+//            System.out.println("权限列表: " + user.getAuthorities()); // 确认权限不为空且正确
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            System.out.println("authentication: " + authentication);
+//            System.out.println("authentication: " + authentication);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.setAttribute( "id", utils.toId(jwt));

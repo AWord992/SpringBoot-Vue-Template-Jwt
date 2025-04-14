@@ -43,7 +43,7 @@ public class SecurityConfiguration {
         return http
                 .authorizeHttpRequests(conf -> conf
                         //不需要认证的请求
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
                         //其余所有请求都需要经过认证
                         .anyRequest().authenticated()
                 )
