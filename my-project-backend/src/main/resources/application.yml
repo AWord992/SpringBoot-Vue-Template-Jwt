@@ -1,3 +1,21 @@
 spring:
-  profiles:
-    active: '@environment@'
+  mail:
+    host: smtp.163.com
+    username: yubinhsia@163.com
+    password: XNj569jxLcgaYebY
+  rabbitmq:
+    addresses: localhost
+    username: admin
+    password: admin
+    virtual-host: /test
+  datasource:
+    url: jdbc:mysql://localhost:3306/test
+    username: test
+    password: 12345678
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    filter:
+      order: -100
+    jwt:
+      key: 'abcdefghijklmn'
+      expire: 7
