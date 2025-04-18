@@ -27,9 +27,12 @@ public class MailQueueListener {
         String type = (String) data.get("type");
         SimpleMailMessage message = switch (type) {
             case "register" -> createMessage("欢迎注册大型同性交友网站",
-                    "您的验证码是：" + code + "有效时间3分钟，请勿向他人泄露验证码信息", email);
+                    "您的验证码是：" + code + "，有效时间3分钟，请勿向他人泄露验证码信息", email);
             case "reset" -> createMessage("找回密码验证码",
-                    "您正在进行密码重置，验证码：" + code + "有效时间3分钟", email);
+                    "您正在进行密码重置，验证码：" + code + "，有效时间3分钟", email);
+            case "modify" ->
+                    createMessage("修改邮箱验证码",
+                            "您正在进行邮箱修改，验证码：" + code + "，有效时间3分钟", email);
             default -> null;
         };
         if (message == null)  return;

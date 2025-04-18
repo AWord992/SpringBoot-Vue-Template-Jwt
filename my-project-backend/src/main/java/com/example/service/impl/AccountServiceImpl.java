@@ -1,12 +1,10 @@
 package com.example.service.impl;
 
-import ch.qos.logback.core.net.server.ConcurrentServerRunner;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.entity.RestBean;
 import com.example.entity.dto.Account;
-import com.example.entity.vo.request.ConfirmResetVO;
-import com.example.entity.vo.request.EmailRegisterVO;
-import com.example.entity.vo.request.EmailResetVO;
+import com.example.entity.vo.request.*;
 import com.example.mapper.AccountMapper;
 import com.example.service.AccountService;
 import com.example.utils.Const;
@@ -38,7 +36,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     StringRedisTemplate stringRedisTemplate;
 
     @Resource
-    PasswordEncoder encoder;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -61,6 +59,11 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Override
+    public Account findAccountById(int id) {
+        return this.query().eq("id", id).one();
+    }
+
+    @Override
     public String registerEmailVerifyCode(String type, String email, String ip) {
         synchronized (ip.intern()){
             if (!this.verifyLimit(ip)){
@@ -80,17 +83,16 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     public String registerEmailAccount(EmailRegisterVO vo) {
         String email = vo.getEmail();
         String username = vo.getUsername();
-        String key = Const.VERIFY_EMAIL_DATA + email;
-        String code = stringRedisTemplate.opsForValue().get(key);
+        String code = this.getEmailVerifyCode(email);
         if(code == null) return "请先获取验证码";
         if (!code.equals(vo.getCode())) return "验证码错误";
         if (this.existAccountByEmail(email)) return "邮箱已被注册";
         if (this.existAccountByUsername(username)) return "用户名已存在";
-        String password = encoder.encode(vo.getPassword());
+        String password = passwordEncoder.encode(vo.getPassword());
         Account account = new Account(null, username, password, email, "user", new Date());
         if (this.save(account)) {
 //          注册成功，可以删除验证码缓存
-            stringRedisTemplate.delete(key);
+            this.deleteEmailVerifyCode(email);
             return null;
         } else {
             return "内部错误，请联系管理员";
@@ -100,7 +102,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     @Override
     public String resetConfirm(ConfirmResetVO vo) {
         String email = vo.getEmail();
-        String code = stringRedisTemplate.opsForValue().get(Const.VERIFY_EMAIL_DATA + email);
+        String code = this.getEmailVerifyCode(email);
         if(code == null) return "请先获取验证码";
         if (!code.equals(vo.getCode())) return "验证码错误";
         if (!this.existAccountByEmail(email)) return "邮箱未注册";
@@ -112,12 +114,61 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         String email = vo.getEmail();
         String verify = this.resetConfirm(new ConfirmResetVO(email, vo.getCode()));
         if (verify != null) return verify;
-        String password = encoder.encode(vo.getPassword());
+        String password = passwordEncoder.encode(vo.getPassword());
         boolean update = this.update().eq("email", email).set("password", password).update();
         if (update){
-            stringRedisTemplate.delete(Const.VERIFY_EMAIL_DATA + email);
+            this.deleteEmailVerifyCode(email);
         }
         return null;
+    }
+
+    @Override
+    public String modifyEmail(int id, ModifyEmailVO vo) {
+        String email = vo.getEmail();
+        String code = getEmailVerifyCode(email);
+        if (code == null) return "请先获取验证码";
+        if (!code.equals(vo.getCode())) return "验证码错误!";
+        this.deleteEmailVerifyCode(email);
+        Account account = this.findAccountByNameOrEmail(email);
+        if (account != null && account.getId() != id) return "该邮箱已被绑定，无法完成操作！";
+        this.update()
+                .set("email", email)
+                .eq("id", id)
+                .update();
+        return null;
+    }
+
+    @Override
+    public String changePassword(int id, ChangePasswordVo vo) {
+        String password = this.query().eq("id", id).one().getPassword();
+        if (!passwordEncoder.matches(vo.getPassword(), password)){
+            return "原密码错误, 请重新输入!";
+        } else {
+            boolean success = this.update()
+                    .set("password", passwordEncoder.encode(vo.getNew_password()))
+                    .eq("id", id)
+                    .update();
+            return success ? null : "未知错误，请联系管理员!";
+        }
+    }
+
+    /**
+     * 移除Redis中存储的邮件验证码
+     * @param email 电邮
+     */
+    private void deleteEmailVerifyCode(String email){
+        String key = Const.VERIFY_EMAIL_DATA + email;
+        stringRedisTemplate.delete(key);
+    }
+
+    /**
+     * 获取Redis中存储的邮件验证码
+     * @param email 电邮
+     * @return 验证码
+     */
+    private String getEmailVerifyCode(String email){
+        String key = Const.VERIFY_EMAIL_DATA + email;
+        return stringRedisTemplate.opsForValue().get(key);
     }
 
     private boolean existAccountByEmail(String email){

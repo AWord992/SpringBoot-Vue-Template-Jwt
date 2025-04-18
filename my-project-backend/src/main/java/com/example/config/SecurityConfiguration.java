@@ -44,6 +44,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(conf -> conf
                         //不需要认证的请求
                         .requestMatchers("/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         //其余所有请求都需要经过认证
                         .anyRequest().authenticated()
                 )
@@ -51,6 +52,7 @@ public class SecurityConfiguration {
                         .loginProcessingUrl("/api/auth/login")
                         .successHandler(this::onAuthenticationSuccess)
                         .failureHandler(this::onAuthenticationFailure)
+                        .permitAll()
                 )
                 .logout(conf -> conf
                         .logoutUrl("/api/auth/logout")

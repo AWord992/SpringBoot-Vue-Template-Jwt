@@ -9,7 +9,7 @@ spring:
     password: admin
     virtual-host: /test
   datasource:
-    url: jdbc:mysql://localhost:3306/test
+    url: jdbc:mysql://localhost:3306/study
     username: test
     password: 12345678
     driver-class-name: com.mysql.cj.jdbc.Driver
