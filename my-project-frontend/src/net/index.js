@@ -4,7 +4,7 @@ import router from "@/router";
 
 const authItemName = "authorize"
 
-export const accessHeader = () => {
+const accessHeader = () => {
     return {
         'Authorization': `Bearer ${takeAccessToken()}`
     }
@@ -116,4 +116,4 @@ function unauthorized() {
     return !takeAccessToken()
 }
 
-export { post, get, login, logout, unauthorized }
+export { post, get, login, logout, unauthorized, accessHeader }

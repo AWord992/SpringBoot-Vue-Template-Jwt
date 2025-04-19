@@ -89,7 +89,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         if (this.existAccountByEmail(email)) return "邮箱已被注册";
         if (this.existAccountByUsername(username)) return "用户名已存在";
         String password = passwordEncoder.encode(vo.getPassword());
-        Account account = new Account(null, username, password, email, "user", new Date());
+        Account account = new Account(null, username, password, email, "user", null, new Date());
         if (this.save(account)) {
 //          注册成功，可以删除验证码缓存
             this.deleteEmailVerifyCode(email);

@@ -44,6 +44,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(conf -> conf
                         //不需要认证的请求
                         .requestMatchers("/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         //其余所有请求都需要经过认证
                         .anyRequest().authenticated()

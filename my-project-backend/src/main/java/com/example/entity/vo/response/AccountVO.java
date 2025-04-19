@@ -9,5 +9,6 @@ public class AccountVO {
     String username;
     String mail;
     String role;
+    String avatar;
     Date registerTime;
 }
