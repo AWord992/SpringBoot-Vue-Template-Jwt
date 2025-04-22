@@ -14,6 +14,7 @@ import com.example.service.AccountDetailsService;
 import com.example.service.AccountPrivacyService;
 import com.example.service.AccountService;
 import com.example.utils.Const;
+import com.example.utils.ControllerUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,9 @@ public class AccountController {
 
     @Resource
     AccountPrivacyService privacyService;
+
+    @Resource
+    ControllerUtils utils;
 
     @GetMapping("/info")
     public RestBean<AccountVO> info(@RequestAttribute(Const.ATTR_USER_ID) int id) {
@@ -60,7 +64,7 @@ public class AccountController {
     public RestBean<Void> modifyEmail(
             @RequestAttribute(Const.ATTR_USER_ID) int id,
             @RequestBody @Valid ModifyEmailVO vo) {
-        return this.messageHandler(() ->
+        return utils.messageHandler(() ->
                 service.modifyEmail(id, vo));
     }
 
@@ -68,7 +72,7 @@ public class AccountController {
     public RestBean<Void> changePassword(
             @RequestAttribute(Const.ATTR_USER_ID) int id,
             @RequestBody @Valid ChangePasswordVo vo) {
-        return this.messageHandler(() ->
+        return utils.messageHandler(() ->
                 service.changePassword(id, vo));
     }
 
@@ -84,10 +88,5 @@ public class AccountController {
     public RestBean<AccountPrivacyVO> privacy(
             @RequestAttribute(Const.ATTR_USER_ID) int id) {
         return RestBean.success(privacyService.accountPrivacy(id).asViewObject(AccountPrivacyVO.class));
-    }
-
-    private <T> RestBean<T> messageHandler(Supplier<String> action) {
-        String message = action.get();
-        return message == null ? RestBean.success() : RestBean.failure(400, message);
     }
 }

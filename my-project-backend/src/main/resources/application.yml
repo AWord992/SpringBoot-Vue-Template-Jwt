@@ -19,7 +19,17 @@ spring:
     jwt:
       key: 'abcdefghijklmn'
       expire: 7
+      limit:
+        base: 10
+        upgrade: 300
+        frequency: 30
   minio:
     endpoint: http://localhost:9000
     username: admin
     password: admin3949
+  weather:
+    key: 4f22ba2b494e4df6b71807aac0939a53
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB

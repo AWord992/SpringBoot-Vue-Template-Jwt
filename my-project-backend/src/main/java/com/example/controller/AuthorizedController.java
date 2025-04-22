@@ -5,6 +5,7 @@ import com.example.entity.vo.request.ConfirmResetVO;
 import com.example.entity.vo.request.EmailRegisterVO;
 import com.example.entity.vo.request.EmailResetVO;
 import com.example.service.AccountService;
+import com.example.utils.ControllerUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,31 +24,29 @@ public class AuthorizedController {
     @Resource
     AccountService service;
 
+    @Resource
+    ControllerUtils utils;
+
     @GetMapping("/ask-code")
     public RestBean<Void> askVerifyCode(@RequestParam @Email String email,
                                         @RequestParam @Pattern(regexp = "(register|reset|modify)") String type,
                                         HttpServletRequest request) {
-        return this.messageHandler(() ->
+        return utils.messageHandler(() ->
                 service.registerEmailVerifyCode(type, email, request.getRemoteAddr()));
     }
 
     @PostMapping("/register")
     public RestBean<Void> register(@RequestBody @Valid EmailRegisterVO vo) {
-        return this.messageHandler(() -> service.registerEmailAccount(vo));
+        return utils.messageHandler(() -> service.registerEmailAccount(vo));
     }
 
     @PostMapping("/reset-confirm")
     public RestBean<Void> resetConfirm(@RequestBody @Valid ConfirmResetVO vo) {
-        return this.messageHandler(() -> service.resetConfirm(vo));
+        return utils.messageHandler(() -> service.resetConfirm(vo));
     }
 
     @PostMapping("/reset-password")
     public RestBean<Void> resetPassword(@RequestBody @Valid EmailResetVO vo) {
-        return this.messageHandler(() -> service.resetEmailAccountPassword(vo));
-    }
-
-    private <T> RestBean<T> messageHandler(Supplier<String> action) {
-        String message = action.get();
-        return message == null ? RestBean.success() : RestBean.failure(400, message);
+        return utils.messageHandler(() -> service.resetEmailAccountPassword(vo));
     }
 }

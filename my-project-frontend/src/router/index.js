@@ -37,7 +37,12 @@ const router = createRouter({
                     path: 'privacy-setting',
                     name: 'privacy-setting',
                     component: () => import('@/views/settings/PrivacySetting.vue')
-                }
+                },
+                {
+                    path: '',
+                    name: 'topic-list',
+                    component: () => import('@/views/forum/TopicList.vue')
+                },
             ]
         }
     ]
