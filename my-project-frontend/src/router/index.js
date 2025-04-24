@@ -29,6 +29,23 @@ const router = createRouter({
             component: () => import('@/views/IndexView.vue'),
             children: [
                 {
+                    path: '',
+                    name: 'topics',
+                    component: () => import('@/views/forum/Forum.vue'),
+                    children: [
+                        {
+                            path: '',
+                            name: 'topic-list',
+                            component: () => import('@/views/forum/TopicList.vue')
+                        },
+                        {
+                            path: 'topic-detail/:tid',
+                            name: 'topic-detail',
+                            component: () => import('@/views/forum/TopicDetail.vue')
+                        }
+                    ]
+                },
+                {
                     path: 'user-setting',
                     name: 'user-setting',
                     component: () => import('@/views/settings/UserSetting.vue')
@@ -37,12 +54,7 @@ const router = createRouter({
                     path: 'privacy-setting',
                     name: 'privacy-setting',
                     component: () => import('@/views/settings/PrivacySetting.vue')
-                },
-                {
-                    path: '',
-                    name: 'topic-list',
-                    component: () => import('@/views/forum/TopicList.vue')
-                },
+                }
             ]
         }
     ]

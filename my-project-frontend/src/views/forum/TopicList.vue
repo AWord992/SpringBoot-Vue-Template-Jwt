@@ -20,7 +20,7 @@ import {useStore} from "@/store";
 import ColorDot from "@/components/ColorDot.vue";
 import router from "@/router";
 import TopicTag from "@/components/TopicTag.vue";
-// import TopicCollectList from "@/components/TopicCollectList.vue";
+import TopicCollectList from "@/components/TopicCollectList.vue";
 import {apiForumTopicList, apiForumTopTopics, apiForumTypes, apiForumWeather} from "@/net/api/forum";
 
 const store = useStore()
@@ -46,13 +46,6 @@ watch(() => topics.type, () => resetList(), {immediate: true})
 const today = computed(() => {
     const date = new Date()
     return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`
-})
-
-apiForumTypes(data => {
-  const array = []
-  array.push({name: '全部', id: 0, color: 'linear-gradient(45deg, white, red, orange, gold, green, blue)'})
-  data.forEach(d => array.push(d))
-  store.forum.types = array
 })
 
 function updateList(){
@@ -227,7 +220,7 @@ onMounted(() => {
             </div>
         </div>
         <topic-editor :show="editor" @success="onTopicCreate" @close="editor = false"/>
-<!--        <topic-collect-list :show="collects" @close="collects = false"/>-->
+        <topic-collect-list :show="collects" @close="collects = false"/>
     </div>
 </template>
 
